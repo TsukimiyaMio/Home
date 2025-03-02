@@ -1,0 +1,484 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>我的网站</title>
+    <!-- 引入 Google Fonts -->
+    <link
+      href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600&display=swap"
+      rel="stylesheet"
+    />
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css"
+    />
+    <style>
+      /* 全局样式 */
+      body {
+        margin: 0;
+        padding: 0;
+        font-family: "Poppins", Arial, sans-serif; /* 使用推荐字体 */
+        color: white;
+        overflow: hidden; /* 禁止滚动 */
+      }
+
+      /* 导航栏按钮样式 */
+      #nav-toggle {
+        position: fixed;
+        top: 20px;
+        left: 20px;
+        z-index: 1000;
+        background-color: rgba(255, 255, 255, 0.1);
+        backdrop-filter: blur(10px);
+        border: none;
+        border-radius: 25px;
+        padding: 10px 20px;
+        color: white;
+        font-size: 1em;
+        cursor: pointer;
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        transition: background-color 0.3s ease, transform 0.3s ease;
+      }
+
+      #nav-toggle:hover {
+        background-color: rgba(255, 255, 255, 0.2);
+        transform: scale(1.05);
+      }
+
+      #nav-toggle .fa-bars {
+        font-size: 1.2em;
+        transition: transform 0.3s ease;
+      }
+
+      #nav-toggle.active .fa-bars {
+        transform: rotate(90deg);
+      }
+
+      /* 导航栏样式 */
+      nav {
+        position: fixed;
+        top: 70px;
+        left: 20px;
+        z-index: 1000;
+        background-color: rgba(255, 255, 255, 0.1);
+        backdrop-filter: blur(10px);
+        border-radius: 15px;
+        padding: 15px;
+        box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        opacity: 0;
+        transform: translateY(-20px);
+        visibility: hidden;
+        transition: opacity 0.3s ease, transform 0.3s ease, visibility 0.3s ease;
+      }
+
+      nav.active {
+        opacity: 1;
+        transform: translateY(0);
+        visibility: visible;
+      }
+
+      nav ul {
+        list-style: none;
+        padding: 0;
+        margin: 0;
+      }
+
+      nav ul li {
+        margin: 15px 0;
+      }
+
+      nav ul li a {
+        color: white;
+        text-decoration: none;
+        font-size: 1em;
+        transition: color 0.3s ease, transform 0.3s ease;
+        display: flex;
+        align-items: center;
+      }
+
+      nav ul li a:hover {
+        color: #007bff;
+        transform: translateX(10px);
+      }
+
+      nav ul li a::before {
+        content: "";
+        display: inline-block;
+        width: 8px;
+        height: 8px;
+        background-color: #007bff;
+        border-radius: 50%;
+        margin-right: 8px;
+        transition: background-color 0.3s ease;
+      }
+
+      nav ul li a:hover::before {
+        background-color: white;
+      }
+
+      /* 页面容器样式 */
+      .page-container {
+        position: relative;
+        width: 100vw;
+        height: 100vh;
+        overflow: hidden;
+      }
+
+      /* 页面样式 */
+      .page {
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        text-align: center;
+        opacity: 0;
+        visibility: hidden;
+        transition: opacity 0.8s cubic-bezier(0.4, 0, 0.2, 1),
+          transform 0.8s cubic-bezier(0.4, 0, 0.2, 1);
+        transform: translate3d(0, 100%, 0); /* 默认位置：下方 */
+        will-change: transform, opacity; /* 提示浏览器优化 */
+      }
+
+      .page.active {
+        opacity: 1;
+        visibility: visible;
+        transform: translate3d(0, 0, 0);
+      }
+
+      /* 向上切换：新页面从下方滑入 */
+      .page.slide-in-up {
+        transform: translate3d(0, 0, 0);
+        opacity: 1;
+      }
+
+      /* 向上切换：旧页面从上方滑出 */
+      .page.slide-out-up {
+        transform: translate3d(0, -100%, 0);
+        opacity: 0;
+      }
+
+      /* 向下切换：新页面从上方滑入 */
+      .page.slide-in-down {
+        transform: translate3d(0, 0, 0);
+        opacity: 1;
+      }
+
+      /* 向下切换：旧页面从下方滑出 */
+      .page.slide-out-down {
+        transform: translate3d(0, 100%, 0);
+        opacity: 0;
+      }
+
+      .page .background {
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background-size: cover;
+        background-position: center;
+        background-repeat: no-repeat;
+        z-index: -1;
+      }
+
+      /* 第一页内容容器样式 */
+      #home .content {
+        background-color: transparent !important; /* 取消背景颜色 */
+        padding: 20px;
+        border-radius: 0 !important; /* 取消圆角 */
+        max-width: 600px;
+        text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.5); /* 添加文字阴影 */
+      }
+
+      /* 其他页面内容容器样式 */
+      .page .content {
+        background-color: rgba(253, 253, 253, 0.5);
+        padding: 20px;
+        border-radius: 10px;
+        max-width: 600px;
+      }
+
+      h1 {
+        font-size: 3em;
+        margin-bottom: 20px;
+        font-weight: 600; /* 使用较粗的字体 */
+      }
+
+      p {
+        font-size: 1.2em;
+        margin: 10px 0;
+        font-weight: 400; /* 使用正常字体 */
+      }
+
+      /* 模糊背景样式 */
+      #blur-background {
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background-size: cover;
+        background-position: center;
+        background-repeat: no-repeat;
+        filter: blur(5px); /* 降低模糊值，提升性能 */
+        opacity: 0;
+        transition: opacity 0.5s ease;
+        z-index: -1;
+        will-change: opacity; /* 提示浏览器优化 */
+      }
+
+      #blur-background.active {
+        opacity: 1;
+        z-index: 1;
+      }
+
+      /* 播放器样式 */
+      iframe {
+        position: fixed;
+        bottom: 15px;
+        left: 15px;
+        z-index: 1000;
+      }
+
+      /* 回到顶部按钮样式 */
+      #back-to-top {
+        position: fixed;
+        bottom: 30px;
+        right: 30px;
+        z-index: 1000; /* 确保按钮在最上层 */
+        background-color: rgba(255, 255, 255, 0.1);
+        backdrop-filter: blur(10px);
+        border: none;
+        border-radius: 50%;
+        width: 50px;
+        height: 50px;
+        color: white;
+        font-size: 1.5em;
+        cursor: pointer;
+        display: none;
+        justify-content: center;
+        align-items: center;
+        transition: background-color 0.3s ease, transform 0.3s ease;
+      }
+
+      #back-to-top:hover {
+        background-color: rgba(255, 255, 255, 0.2);
+        transform: scale(1.1);
+      }
+    </style>
+  </head>
+  <body>
+    <!-- 模糊背景容器 -->
+    <div id="blur-background" class="blur-background"></div>
+
+    <!-- 导航栏按钮 -->
+    <button id="nav-toggle">
+      <i class="fas fa-bars"></i>
+      <span class="text">导航栏🧭</span>
+    </button>
+
+    <!-- 导航栏 -->
+    <nav>
+      <ul>
+        <li><a href="#home" data-target="home">🌈主页💫</a></li>
+        <li><a href="#info" data-target="info">😊个人简介✉️</a></li>
+        <li><a href="#message" data-target="message">☕一些留言💬</a></li>
+      </ul>
+    </nav>
+
+    <!-- 页面容器 -->
+    <div class="page-container">
+      <!-- 主页 -->
+      <section id="home" class="page active">
+        <div
+          class="background"
+          style="background-image: url('images/background/希儿.jpg')"
+        ></div>
+        <div class="content">
+          <h1>欢迎来到我的网站</h1>
+          <p>网站正在逐步完善中，完成后将正式上线</p>
+        </div>
+      </section>
+
+      <!-- 个人信息 -->
+      <section id="info" class="page">
+        <div
+          class="background"
+          style="background-image: url('images/background/雪.jpg')"
+        ></div>
+        <div class="content">
+          <h1>个人简介</h1>
+          <p>姓名</p>
+          <p>爱好</p>
+          <p>1</p>
+          <p>2</p>
+        </div>
+      </section>
+
+     <!-- 开发者留言 -->
+<section id="message" class="page">
+  <div
+    class="background"
+    style="background-image: url('images/background/玲美.jpg')"
+  ></div>
+  <div class="content">
+    <h1>开发者留言</h1>
+    <p>感谢您访问我的网站✨</p>
+    <p>本项目通过AI生成,使用github部署,零基础小白也能轻松部署🌱</p>
+    <a
+      href=" "
+      target="_blank"
+      style="color: #007bff; text-decoration: none;"
+    >
+    👉点此前往项目主页👈
+    </a >
+    <p style="font-size: 14px; font-weight: bold;">喜欢请给个star⭐支持一下吧</p> <!-- 调整了字体大小并加粗 -->
+    </div>
+    </section>
+
+    <!-- 一键回到顶部按钮 -->
+    <button id="back-to-top">
+      <i class="fas fa-arrow-up"></i>
+    </button>
+
+    <!-- 网易云音乐播放器 -->
+    <iframe
+      frameborder="no"
+      marginwidth="0"
+      marginheight="0"
+      width="330"
+      height="86"
+      src="//music.163.com/outchain/player?type=2&id=2034549028&auto=1&height=66"
+    >
+    </iframe>
+
+    <script>
+      // 导航栏逻辑
+      const navToggle = document.getElementById("nav-toggle");
+      const nav = document.querySelector("nav");
+      navToggle.addEventListener("click", () => {
+        nav.classList.toggle("active");
+        navToggle.classList.toggle("active");
+      });
+
+      // 页面切换逻辑
+      const pages = document.querySelectorAll(".page");
+      const blurBackground = document.getElementById("blur-background");
+      const backToTopButton = document.getElementById("back-to-top");
+      let currentPageIndex = 0;
+      let isAnimating = false; // 防止动画冲突
+
+      // 默认显示主页
+      pages[currentPageIndex].classList.add("active");
+
+      // 更新“回到顶部”按钮显示状态
+      function updateBackToTopButton() {
+        if (currentPageIndex > 0) {
+          backToTopButton.style.display = "flex";
+        } else {
+          backToTopButton.style.display = "none";
+        }
+      }
+
+      // 鼠标滚轮切换页面
+      window.addEventListener("wheel", (e) => {
+        if (isAnimating) return; // 如果正在动画，则忽略滚轮事件
+
+        if (e.deltaY > 0) {
+          // 向下滚动
+          if (currentPageIndex < pages.length - 1) {
+            switchPage(currentPageIndex, currentPageIndex + 1);
+            currentPageIndex++;
+          }
+        } else if (e.deltaY < 0) {
+          // 向上滚动
+          if (currentPageIndex > 0) {
+            switchPage(currentPageIndex, currentPageIndex - 1);
+            currentPageIndex--;
+          }
+        }
+        updateBackToTopButton(); // 更新按钮状态
+      });
+
+      // 切换页面函数
+      function switchPage(fromIndex, toIndex) {
+        isAnimating = true; // 开始动画
+
+        const currentPage = pages[fromIndex];
+        const nextPage = pages[toIndex];
+
+        // 设置模糊背景为当前页面的背景图片
+        const currentBackground =
+          currentPage.querySelector(".background").style.backgroundImage;
+        blurBackground.style.backgroundImage = currentBackground;
+
+        // 显示模糊背景
+        blurBackground.classList.add("active");
+
+        // 判断切换方向
+        if (fromIndex < toIndex) {
+          // 向下切换
+          currentPage.classList.add("slide-out-up"); // 当前页面向上滑出
+          nextPage.classList.add("slide-in-down"); // 新页面从下方滑入
+        } else {
+          // 向上切换
+          currentPage.classList.add("slide-out-down"); // 当前页面向下滑出
+          nextPage.classList.add("slide-in-up"); // 新页面从上方滑入
+        }
+
+        // 下一页面滑入
+        setTimeout(() => {
+          nextPage.classList.add("active");
+
+          // 隐藏模糊背景
+          blurBackground.classList.remove("active");
+
+          // 动画结束后重置状态
+          setTimeout(() => {
+            currentPage.classList.remove(
+              "active",
+              "slide-out-up",
+              "slide-out-down"
+            );
+            nextPage.classList.remove("slide-in-down", "slide-in-up");
+            isAnimating = false; // 结束动画
+          }, 800); // 与 CSS 过渡时间一致
+        }, 800); // 等待当前页面滑出完成
+      }
+
+      // 导航栏点击切换页面
+      const navLinks = document.querySelectorAll("nav ul li a");
+      navLinks.forEach((link) => {
+        link.addEventListener("click", (e) => {
+          e.preventDefault(); // 阻止默认跳转行为
+          const target = link.getAttribute("data-target"); // 获取目标页面的 id
+          const targetPage = document.getElementById(target); // 获取目标页面元素
+
+          if (targetPage) {
+            const targetIndex = Array.from(pages).indexOf(targetPage); // 获取目标页面的索引
+            if (targetIndex !== currentPageIndex) {
+              switchPage(currentPageIndex, targetIndex); // 切换到目标页面
+              currentPageIndex = targetIndex; // 更新当前页面索引
+              updateBackToTopButton(); // 更新按钮状态
+            }
+          }
+        });
+      });
+
+      // 点击按钮回到顶部
+      backToTopButton.addEventListener("click", () => {
+        if (isAnimating) return; // 如果正在动画，则忽略点击事件
+        switchPage(currentPageIndex, 0);
+        currentPageIndex = 0;
+        updateBackToTopButton();
+      });
+    </script>
+  </body>
+</html>

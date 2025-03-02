@@ -1,0 +1,37 @@
+/* 全局样式 */
+body {
+  margin: 0;
+  padding: 0;
+  font-family: "Poppins", Arial, sans-serif; /* 使用推荐字体 */
+  color: white;
+  overflow: hidden; /* 禁止滚动 */
+}
+
+/* 第一页内容容器样式 */
+#home .content {
+  background-color: transparent; /* 取消背景颜色 */
+  padding: 20px;
+  border-radius: 0; /* 取消圆角 */
+  max-width: 600px;
+  text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.5); /* 添加文字阴影 */
+}
+
+/* 其他页面内容容器样式 */
+.page .content {
+  background-color: rgba(253, 253, 253, 0.5);
+  padding: 20px;
+  border-radius: 10px;
+  max-width: 600px;
+}
+
+h1 {
+  font-size: 3em;
+  margin-bottom: 20px;
+  font-weight: 600; /* 使用较粗的字体 */
+}
+
+p {
+  font-size: 1.2em;
+  margin: 10px 0;
+  font-weight: 400; /* 使用正常字体 */
+}
